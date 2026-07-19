@@ -332,43 +332,46 @@ main{
   overflow: hidden;
   position: relative;
 }
+.map-svg{ width: 100%; height: auto; display: block; }
 
-.leaflet-map{
-  width: 100%;
-  height: 340px;
-  background: var(--surface);
+.route-path{
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 5;
+  transition: stroke 0.3s ease, stroke-width 0.3s ease;
+}
+.route-path.is-active{ stroke: var(--azul-bright); stroke-width: 2; }
+
+.node-halo{
+  fill: rgba(95,168,224,0.08);
+  transition: fill 0.3s ease, r 0.3s ease;
+}
+.node-dot{
+  fill: var(--azul);
+  transition: fill 0.3s ease;
+}
+.map-node.is-active .node-halo{ fill: rgba(242,167,59,0.16); r: 20; }
+.map-node.is-active .node-dot{ fill: var(--marigold); }
+.map-node.is-active .node-label{ fill: var(--paper); font-weight: 600; }
+
+.node-label{
+  fill: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-anchor: middle;
 }
 
-/* tiñe los tiles de OpenStreetMap para que combinen con el tema oscuro */
-.leaflet-map .leaflet-tile-pane{
-  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.7);
+@media (prefers-reduced-motion: no-preference){
+  .map-node .node-halo{ animation: pulse 3.2s ease-in-out infinite; }
+  .map-node:nth-of-type(2) .node-halo{ animation-delay: 0.6s; }
+  .map-node:nth-of-type(3) .node-halo{ animation-delay: 1.2s; }
+  .map-node:nth-of-type(4) .node-halo{ animation-delay: 1.8s; }
 }
-.leaflet-map .leaflet-control-zoom a{
-  background: var(--surface-raised);
-  color: var(--paper);
-  border-color: var(--line) !important;
+@keyframes pulse{
+  0%,100%{ opacity: 0.55; }
+  50%{ opacity: 1; }
 }
-.leaflet-map .leaflet-control-zoom a:hover{ background: var(--azul); }
-.leaflet-map .leaflet-control-attribution{
-  background: rgba(16,21,28,0.75);
-  color: var(--muted);
-}
-.leaflet-map .leaflet-control-attribution a{ color: var(--azul-bright); }
-.leaflet-map .leaflet-popup-content-wrapper,
-.leaflet-map .leaflet-popup-tip{
-  background: var(--surface-raised);
-  color: var(--paper);
-}
-.leaflet-map .leaflet-popup-content{ font-family: var(--font-body); font-size: 0.86rem; }
-
-.punto-marker{
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  border: 2px solid var(--ink);
-  box-shadow: 0 0 0 2px currentColor;
-  cursor: pointer;
-}
-.punto-marker.is-selected{ transform: scale(1.35); }
 
 .map-badge{
   position: absolute;
@@ -381,8 +384,6 @@ main{
   padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  z-index: 500;
-  pointer-events: none;
 }
 
 /* ============================================
@@ -576,4 +577,238 @@ main{
 
 @media (min-width: 960px){
   :root{ --max-width: 880px; }
+}
+
+/* ============================================
+   MAPA REAL (LEAFLET)
+   ============================================ */
+.leaflet-map{
+  width: 100%;
+  height: 320px;
+  background: var(--surface);
+}
+/* tiñe los tiles de OSM para que combinen con el tema oscuro */
+.leaflet-map .leaflet-tile-pane{
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.7);
+}
+.leaflet-map .leaflet-control-zoom a{
+  background: var(--surface-raised);
+  color: var(--paper);
+  border-color: var(--line);
+}
+.leaflet-map .leaflet-control-zoom a:hover{ background: var(--line); }
+.leaflet-map .leaflet-control-attribution{
+  background: rgba(16,21,28,0.75);
+  color: var(--muted);
+}
+.leaflet-map .leaflet-control-attribution a{ color: var(--azul-bright); }
+
+.punto-marker{ background: transparent; border: none; }
+.punto-marker .punto-dot{
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  box-shadow: 0 0 0 2px rgba(236,231,221,0.18);
+}
+
+.leaflet-popup-content-wrapper{
+  background: var(--surface-raised);
+  color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+}
+.leaflet-popup-content{ margin: 10px 12px; }
+.leaflet-popup-tip{ background: var(--surface-raised); }
+.leaflet-popup-close-button{ color: var(--muted) !important; }
+
+@media (min-width: 720px){
+  .leaflet-map{ height: 420px; }
+}
+
+/* ============================================
+   TRAZADOR DE RUTAS (trazar + guardar en localStorage)
+   ============================================ */
+.tracer{ margin-top: 14px; }
+
+.tracer-toggle{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  color: var(--paper);
+  font-weight: 500;
+  font-size: 0.94rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.tracer-toggle:hover{ border-color: var(--verde); }
+.tracer-toggle svg{
+  width: 20px; height: 20px; flex-shrink: 0;
+  fill: none; stroke: var(--verde); stroke-width: 1.8;
+}
+.tracer-toggle[aria-expanded="true"]{ border-color: var(--verde); background: var(--surface-raised); }
+
+.tracer-panel{
+  margin-top: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px var(--gutter) 20px;
+}
+
+.tracer-help{
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin-bottom: 16px;
+}
+
+.tracer-mode{
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tracer-mode-btn{
+  flex: 1;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.tracer-mode-btn.is-active{
+  background: var(--verde);
+  border-color: var(--verde);
+  color: #0C2118;
+}
+.tracer-mode-btn:disabled{ opacity: 0.5; cursor: not-allowed; }
+
+.tracer-controls{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tracer-btn{
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.tracer-btn:active{ transform: scale(0.98); }
+.tracer-btn--start,
+.tracer-btn--save{ background: var(--verde); color: #0C2118; flex: 1; }
+.tracer-btn--start:hover,
+.tracer-btn--save:hover{ background: #63c491; }
+.tracer-btn--stop{ background: var(--volcan); color: #2A0D08; flex: 1; }
+.tracer-btn--stop:hover{ background: #ea7160; }
+.tracer-btn--undo,
+.tracer-btn--cancel{ background: var(--surface-raised); color: var(--paper); border: 1px solid var(--line); }
+.tracer-btn--undo:hover,
+.tracer-btn--cancel:hover{ border-color: var(--muted); }
+
+.tracer-status{
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--verde);
+  min-height: 1.2em;
+}
+
+.tracer-save-form{
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.tracer-field-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.tracer-field{ display: flex; flex-direction: column; gap: 6px; }
+.tracer-field label{
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+.tracer-field input,
+.tracer-field select,
+.tracer-field textarea{
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--paper);
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  font-family: var(--font-body);
+}
+.tracer-field textarea{ resize: vertical; }
+.tracer-field input:focus,
+.tracer-field select:focus,
+.tracer-field textarea:focus{ outline: none; border-color: var(--verde); }
+
+.tracer-saved{
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.tracer-saved h3{
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.tracer-saved-list{ display: flex; flex-direction: column; gap: 10px; }
+.tracer-saved-item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  flex-wrap: wrap;
+}
+.tracer-saved-info{ display: flex; flex-direction: column; gap: 2px; font-size: 0.84rem; min-width: 0; }
+.tracer-saved-info strong{ color: var(--paper); font-size: 0.9rem; }
+.tracer-saved-info span{ color: var(--muted); }
+.tracer-saved-meta{ font-family: var(--font-mono); font-size: 0.72rem; }
+.tracer-saved-actions{ display: flex; gap: 8px; flex-shrink: 0; }
+.tracer-mini-btn{
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--azul-bright);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+.tracer-mini-btn:hover{ border-color: var(--azul-bright); }
+.tracer-mini-btn--danger{ color: var(--volcan); }
+.tracer-mini-btn--danger:hover{ border-color: var(--volcan); }
+
+/* tarjeta especial de resultado: ruta guardada por el propio usuario */
+.route-card--guardada{ border-color: var(--verde); }
+.card-tag.tag--guardada{ background: rgba(79,174,126,0.16); color: var(--verde); }
+
+@media (min-width: 720px){
+  .tracer-panel{ padding: 24px 30px 26px; }
 }
