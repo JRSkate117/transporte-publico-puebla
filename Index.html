@@ -1,4 +1,152 @@
 <!DOCTYPE html>
-<title>Hola</title>
-<p>QUE trampa nena</p> 
-<p>gurf</p>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿A dónde vas? · Rutas Puebla, Cholula, San Martín y Huejotzingo</title>
+<meta name="description" content="Encuentra la ruta de combi, RUTA o autobús más rápida, económica o con menos caminata entre Puebla, Cholula, San Martín Texmelucan y Huejotzingo.">
+<meta name="theme-color" content="#10151C">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="8" cy="20" r="5" fill="var(--marigold)"/>
+        <line x1="12" y1="20" x2="28" y2="20" stroke="var(--muted)" stroke-width="2" stroke-dasharray="1 6" stroke-linecap="round"/>
+        <circle cx="32" cy="20" r="5" fill="none" stroke="var(--azul)" stroke-width="3"/>
+      </svg>
+      <p class="eyebrow">Transporte público · Región Puebla</p>
+    </div>
+    <h1>¿A dónde vas<span class="accent">?</span></h1>
+    <p class="tagline">Combis, RUTA y autobuses entre cuatro zonas, sin dar vueltas.</p>
+
+    <div class="zone-selector" role="group" aria-label="Selecciona tu zona de referencia">
+      <button class="zone-chip is-active" data-zone="puebla" aria-pressed="true">Puebla</button>
+      <button class="zone-chip" data-zone="cholula" aria-pressed="false">Cholula</button>
+      <button class="zone-chip" data-zone="sanmartin" aria-pressed="false">San Martín</button>
+      <button class="zone-chip" data-zone="huejotzingo" aria-pressed="false">Huejotzingo</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section id="buscador" class="search-section" aria-labelledby="buscador-title">
+    <h2 id="buscador-title" class="visually-hidden">Buscador de rutas</h2>
+
+    <form id="search-form" class="route-finder" autocomplete="off">
+
+      <div class="stop-field">
+        <span class="stop-dot stop-dot--origin" aria-hidden="true"></span>
+        <div class="stop-inputwrap">
+          <label for="origen">Origen</label>
+          <input type="text" id="origen" name="origen" placeholder="¿Desde dónde sales?" aria-expanded="false" aria-controls="origen-suggestions" role="combobox" aria-autocomplete="list">
+          <button type="button" class="clear-btn" data-target="origen" aria-label="Borrar origen" hidden>&times;</button>
+        </div>
+        <ul class="suggestions" id="origen-suggestions" role="listbox" hidden></ul>
+      </div>
+
+      <div class="route-connector" aria-hidden="true">
+        <span class="connector-line"></span>
+        <span class="connector-bus" id="connector-bus">
+          <svg viewBox="0 0 24 24"><path d="M4 16V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="8" cy="19" r="1.6"/><circle cx="16" cy="19" r="1.6"/><line x1="4" y1="11" x2="20" y2="11"/></svg>
+        </span>
+      </div>
+
+      <div class="stop-field">
+        <span class="stop-dot stop-dot--destino" aria-hidden="true"></span>
+        <div class="stop-inputwrap">
+          <label for="destino">Destino</label>
+          <input type="text" id="destino" name="destino" placeholder="¿A dónde llegas?" aria-expanded="false" aria-controls="destino-suggestions" role="combobox" aria-autocomplete="list">
+          <button type="button" class="clear-btn" data-target="destino" aria-label="Borrar destino" hidden>&times;</button>
+        </div>
+        <ul class="suggestions" id="destino-suggestions" role="listbox" hidden></ul>
+      </div>
+
+      <button type="submit" class="btn-buscar" id="btn-buscar">
+        <span>Buscar ruta</span>
+      </button>
+      <p class="search-hint" id="search-hint" role="status"></p>
+    </form>
+  </section>
+
+  <section id="mapa" class="map-section" aria-labelledby="mapa-title">
+    <h2 id="mapa-title" class="visually-hidden">Vista de mapa</h2>
+    <div class="map-placeholder">
+      <svg class="map-svg" viewBox="0 0 320 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(236,231,221,0.05)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="320" height="220" fill="url(#grid)"/>
+
+        <path d="M40,60 L30,140" class="route-path" data-pair="huejotzingo-sanmartin"/>
+        <path d="M30,140 L140,120" class="route-path" data-pair="cholula-sanmartin"/>
+        <path d="M40,60 L140,120" class="route-path" data-pair="cholula-huejotzingo"/>
+        <path d="M140,120 L240,80" class="route-path" data-pair="cholula-puebla"/>
+        <path d="M30,140 L240,80" class="route-path" data-pair="puebla-sanmartin"/>
+        <path d="M40,60 L240,80" class="route-path" data-pair="huejotzingo-puebla"/>
+
+        <g class="map-node" data-zone="huejotzingo" transform="translate(40,60)">
+          <circle r="14" class="node-halo"/>
+          <circle r="6" class="node-dot"/>
+          <text y="-20" class="node-label">Huejotzingo</text>
+        </g>
+        <g class="map-node" data-zone="sanmartin" transform="translate(30,140)">
+          <circle r="14" class="node-halo"/>
+          <circle r="6" class="node-dot"/>
+          <text y="24" class="node-label">San Martín</text>
+        </g>
+        <g class="map-node" data-zone="cholula" transform="translate(140,120)">
+          <circle r="14" class="node-halo"/>
+          <circle r="6" class="node-dot"/>
+          <text y="24" class="node-label">Cholula</text>
+        </g>
+        <g class="map-node" data-zone="puebla" transform="translate(240,80)">
+          <circle r="16" class="node-halo"/>
+          <circle r="7" class="node-dot"/>
+          <text y="-22" class="node-label">Puebla</text>
+        </g>
+      </svg>
+      <p class="map-badge">Vista previa del corredor · Leaflet.js próximamente</p>
+    </div>
+  </section>
+
+  <section id="resultados" class="results-section" aria-labelledby="resultados-title" aria-live="polite">
+    <h2 id="resultados-title" class="visually-hidden">Resultados de búsqueda</h2>
+
+    <div class="results-empty" id="results-empty">
+      <svg viewBox="0 0 48 48" aria-hidden="true" class="empty-icon">
+        <rect x="6" y="10" width="36" height="28" rx="4"/>
+        <line x1="6" y1="22" x2="42" y2="22" stroke-dasharray="2 4"/>
+        <circle cx="24" cy="30" r="3"/>
+      </svg>
+      <p>Tu boleto aparecerá aquí en cuanto elijas un origen y un destino.</p>
+    </div>
+
+    <div class="results-list" id="results-list" hidden>
+      <div class="results-heading">
+        <h3>De <span id="result-origin"></span> a <span id="result-destino"></span></h3>
+        <p class="results-sub">3 formas de llegar, ordenadas para ti</p>
+      </div>
+      <div class="cards-grid" id="cards-grid"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Hecho para moverte por Puebla, Cholula, San Martín Texmelucan y Huejotzingo. Datos de referencia — confirma tarifas y horarios con el operador.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
