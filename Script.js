@@ -14,35 +14,43 @@ const ZONAS = {
 
 const PUNTOS = [
   // Puebla
-  { id: "pue-zocalo",     nombre: "Zócalo de Puebla",              zona: "puebla",      tipo: "Centro" },
-  { id: "pue-capu",       nombre: "CAPU · Terminal de Autobuses",  zona: "puebla",      tipo: "Terminal" },
-  { id: "pue-angelopolis",nombre: "Angelópolis",                   zona: "puebla",      tipo: "Comercial" },
-  { id: "pue-buap",       nombre: "BUAP Ciudad Universitaria",     zona: "puebla",      tipo: "Universidad" },
-  { id: "pue-mercadoalto",nombre: "Mercado El Alto",                zona: "puebla",      tipo: "Mercado" },
-  { id: "pue-arcangeles", nombre: "Arcángeles",                    zona: "puebla",      tipo: "Comercial" },
-  { id: "pue-lanoria",    nombre: "La Noria",                      zona: "puebla",      tipo: "Barrio" },
-  { id: "pue-4poniente",  nombre: "4 Poniente, Centro Histórico",  zona: "puebla",      tipo: "Centro" },
-  { id: "pue-pasebravo",  nombre: "Paseo Bravo",                   zona: "puebla",      tipo: "Parque" },
+  { id: "pue-zocalo",     nombre: "Zócalo de Puebla",              zona: "puebla",      tipo: "Centro",      lat: 19.0414, lng: -98.2063 },
+  { id: "pue-capu",       nombre: "CAPU · Terminal de Autobuses",  zona: "puebla",      tipo: "Terminal",    lat: 19.0728, lng: -98.1938 },
+  { id: "pue-angelopolis",nombre: "Angelópolis",                   zona: "puebla",      tipo: "Comercial",   lat: 19.0159, lng: -98.2436 },
+  { id: "pue-buap",       nombre: "BUAP Ciudad Universitaria",     zona: "puebla",      tipo: "Universidad", lat: 19.0037, lng: -98.2064 },
+  { id: "pue-mercadoalto",nombre: "Mercado El Alto",                zona: "puebla",      tipo: "Mercado",     lat: 19.0522, lng: -98.1975 },
+  { id: "pue-arcangeles", nombre: "Arcángeles",                    zona: "puebla",      tipo: "Comercial",   lat: 19.0483, lng: -98.2277 },
+  { id: "pue-lanoria",    nombre: "La Noria",                      zona: "puebla",      tipo: "Barrio",      lat: 19.0562, lng: -98.1889 },
+  { id: "pue-4poniente",  nombre: "4 Poniente, Centro Histórico",  zona: "puebla",      tipo: "Centro",      lat: 19.0447, lng: -98.2038 },
+  { id: "pue-pasebravo",  nombre: "Paseo Bravo",                   zona: "puebla",      tipo: "Parque",      lat: 19.0453, lng: -98.2135 },
 
   // Cholula
-  { id: "cho-udlap",      nombre: "UDLAP",                          zona: "cholula",     tipo: "Universidad" },
-  { id: "cho-piramide",   nombre: "Zona Arqueológica / Pirámide",  zona: "cholula",     tipo: "Monumento" },
-  { id: "cho-sanpedro",   nombre: "San Pedro Cholula, Centro",      zona: "cholula",     tipo: "Centro" },
-  { id: "cho-sanandres",  nombre: "San Andrés Cholula, Centro",     zona: "cholula",     tipo: "Centro" },
-  { id: "cho-recta",      nombre: "Recta a Cholula",                zona: "cholula",     tipo: "Avenida" },
+  { id: "cho-udlap",      nombre: "UDLAP",                          zona: "cholula",     tipo: "Universidad", lat: 19.0523, lng: -98.2941 },
+  { id: "cho-piramide",   nombre: "Zona Arqueológica / Pirámide",  zona: "cholula",     tipo: "Monumento",   lat: 19.0578, lng: -98.3025 },
+  { id: "cho-sanpedro",   nombre: "San Pedro Cholula, Centro",      zona: "cholula",     tipo: "Centro",      lat: 19.0638, lng: -98.3061 },
+  { id: "cho-sanandres",  nombre: "San Andrés Cholula, Centro",     zona: "cholula",     tipo: "Centro",      lat: 19.0466, lng: -98.2814 },
+  { id: "cho-recta",      nombre: "Recta a Cholula",                zona: "cholula",     tipo: "Avenida",     lat: 19.0480, lng: -98.2650 },
 
   // San Martín Texmelucan
-  { id: "sma-centro",     nombre: "Centro de San Martín Texmelucan", zona: "sanmartin",  tipo: "Centro" },
-  { id: "sma-terminal",   nombre: "Terminal San Martín",             zona: "sanmartin",  tipo: "Terminal" },
-  { id: "sma-caseta",     nombre: "Caseta México-Puebla",            zona: "sanmartin",  tipo: "Caseta" },
-  { id: "sma-mercado",    nombre: "Mercado Emiliano Zapata",         zona: "sanmartin",  tipo: "Mercado" },
+  { id: "sma-centro",     nombre: "Centro de San Martín Texmelucan", zona: "sanmartin",  tipo: "Centro",      lat: 19.2814, lng: -98.4322 },
+  { id: "sma-terminal",   nombre: "Terminal San Martín",             zona: "sanmartin",  tipo: "Terminal",    lat: 19.2839, lng: -98.4271 },
+  { id: "sma-caseta",     nombre: "Caseta México-Puebla",            zona: "sanmartin",  tipo: "Caseta",      lat: 19.2650, lng: -98.4033 },
+  { id: "sma-mercado",    nombre: "Mercado Emiliano Zapata",         zona: "sanmartin",  tipo: "Mercado",     lat: 19.2798, lng: -98.4300 },
 
   // Huejotzingo
-  { id: "hue-centro",     nombre: "Centro de Huejotzingo",           zona: "huejotzingo", tipo: "Centro" },
-  { id: "hue-convento",   nombre: "Convento Franciscano",            zona: "huejotzingo", tipo: "Monumento" },
-  { id: "hue-caseta",     nombre: "Caseta Amozoc-Perote",            zona: "huejotzingo", tipo: "Caseta" },
-  { id: "hue-mercado",    nombre: "Mercado de Huejotzingo",          zona: "huejotzingo", tipo: "Mercado" },
+  { id: "hue-centro",     nombre: "Centro de Huejotzingo",           zona: "huejotzingo", tipo: "Centro",     lat: 19.1519, lng: -98.4028 },
+  { id: "hue-convento",   nombre: "Convento Franciscano",            zona: "huejotzingo", tipo: "Monumento",  lat: 19.1508, lng: -98.4009 },
+  { id: "hue-caseta",     nombre: "Caseta Amozoc-Perote",            zona: "huejotzingo", tipo: "Caseta",     lat: 19.1650, lng: -98.3850 },
+  { id: "hue-mercado",    nombre: "Mercado de Huejotzingo",          zona: "huejotzingo", tipo: "Mercado",    lat: 19.1524, lng: -98.4041 },
 ];
+
+/* color por zona, usado en los marcadores del mapa */
+const COLOR_ZONA = {
+  puebla:      "#5FA8E0",
+  cholula:     "#F2A73B",
+  sanmartin:   "#4FAE7E",
+  huejotzingo: "#E1543F",
+};
 
 /* ----------------------------------------------------------
    2) PLANTILLAS DE RUTAS POR PAR DE ZONAS
@@ -186,20 +194,70 @@ zoneChips.forEach(chip => {
 });
 
 /* ----------------------------------------------------------
-   6) MAPA — resaltar nodo/ruta activa
+   6) MAPA REAL — Leaflet.js + tiles de OpenStreetMap
    ---------------------------------------------------------- */
+const mapa = L.map("leaflet-map", { attributionControl: true, scrollWheelZoom: false })
+  .setView([19.09, -98.32], 11);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 18,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+}).addTo(mapa);
+
+const marcadores = {}; // id -> L.marker
+
+PUNTOS.forEach(punto => {
+  const icono = L.divIcon({
+    className: "",
+    html: `<span class="punto-marker" style="color:${COLOR_ZONA[punto.zona]}; background:${COLOR_ZONA[punto.zona]}"></span>`,
+    iconSize: [14, 14],
+  });
+  const marker = L.marker([punto.lat, punto.lng], { icon: icono, title: punto.nombre })
+    .addTo(mapa)
+    .bindPopup(`<strong>${punto.nombre}</strong><br>${ZONAS[punto.zona]} · ${punto.tipo}`);
+
+  marker.on("click", () => seleccionarDesdeMapa(punto));
+  marcadores[punto.id] = marker;
+});
+
+// si el origen está vacío, el punto tocado en el mapa lo llena; si no, llena el destino
+function seleccionarDesdeMapa(punto){
+  if (!state.origen){
+    document.getElementById("origen").value = punto.nombre;
+    state.origen = punto;
+    document.querySelector('.clear-btn[data-target="origen"]').hidden = false;
+  } else if (!state.destino){
+    document.getElementById("destino").value = punto.nombre;
+    state.destino = punto;
+    document.querySelector('.clear-btn[data-target="destino"]').hidden = false;
+  } else {
+    // ambos llenos: reinicia con este punto como nuevo origen
+    document.getElementById("origen").value = punto.nombre;
+    state.origen = punto;
+    document.getElementById("destino").value = "";
+    state.destino = null;
+    document.querySelector('.clear-btn[data-target="destino"]').hidden = true;
+  }
+  actualizarEstadoBusqueda();
+}
+
+let lineaTrayecto = null;
+
 function resaltarNodoMapa(zona){
-  document.querySelectorAll(".map-node").forEach(node => {
-    node.classList.toggle("is-active", node.dataset.zone === zona);
-  });
+  // sin efecto visual adicional en el mapa real; se conserva por compatibilidad
 }
+
 function resaltarRutaMapa(zonaA, zonaB){
-  const clave = claveZonas(zonaA, zonaB);
-  document.querySelectorAll(".route-path").forEach(path => {
-    path.classList.toggle("is-active", path.dataset.pair === clave);
-  });
+  if (!state.origen || !state.destino) return;
+  if (lineaTrayecto) mapa.removeLayer(lineaTrayecto);
+
+  lineaTrayecto = L.polyline(
+    [[state.origen.lat, state.origen.lng], [state.destino.lat, state.destino.lng]],
+    { color: "#F2A73B", weight: 3, dashArray: "2 8", opacity: 0.9 }
+  ).addTo(mapa);
+
+  mapa.fitBounds(lineaTrayecto.getBounds(), { padding: [40, 40] });
 }
-resaltarNodoMapa(state.zonaActiva);
 
 /* ----------------------------------------------------------
    7) AUTOCOMPLETADO
