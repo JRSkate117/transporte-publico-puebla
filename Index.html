@@ -1,11 +1,202 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transporte Público</title>
+    <title>Transporte Público Puebla</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-hola 
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
+                <i class="bi bi-bus-front-fill fs-4 me-2"></i> Rutas Puebla
+            </a>
+            <button id="btnThemeToggle" class="btn btn-outline-light btn-sm ms-auto rounded-circle" title="Cambiar Tema">
+                <i class="bi bi-moon-fill" id="themeIcon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="app-container">
+        <aside class="sidebar p-3">
+            <h5 class="mb-4 fw-bold">Rutas Disponibles</h5>
+            <div id="lista-rutas" class="list-group">
+                </div>
+        </aside>
+
+        <main class="map-container">
+            <div class="floating-search d-flex">
+                <input class="form-control" type="search" placeholder="¿A dónde vas?">
+                <button class="btn btn-primary ms-2" type="button"><i class="bi bi-search"></i></button>
+            </div>
+            <div id="map"></div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="rutas.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Configuración de URLs para el mapa (Claro y Oscuro)
+            const mapLayerLight = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+            const mapLayerDark = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+            // 2. Comprobar si el usuario ya tenía el modo oscuro guardado
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const btnThemeToggle = document.getElementById('btnThemeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+            }
+
+            // 3. Inicializar el mapa
+            const map = L.map('map', { zoomControl: false }).setView([19.0414, -98.2063], 12);
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            
+            // Añadir la capa inicial según el tema
+            const tileLayer = L.tileLayer(currentTheme === 'dark' ? mapLayerDark : mapLayerLight, {
+                attribution: '&copy; OpenStreetMap & CartoDB',
+                maxZoom: 19
+            }).addTo(map);
+
+            // 4. Lógica del Botón de Modo Oscuro
+            btnThemeToggle.addEventListener('click', () => {
+                const isDark = document.body.classList.toggle('dark-theme');
+                
+                // Cambiar el icono
+                if(isDark) {
+                    themeIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                    tileLayer.setUrl(mapLayerDark); // Cambiar el mapa a modo oscuro
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    themeIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                    tileLayer.setUrl(mapLayerLight); // Cambiar el mapa a modo claro
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // 5. Renderizar Rutas
+            const contenedorRutas = document.getElementById('lista-rutas');
+
+            rutasPublicas.forEach(ruta => {
+                contenedorRutas.innerHTML += `
+                    <div class="list-group-item route-card" style="border-left-color: ${ruta.color};">
+                        <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                            <h6 class="mb-0 fw-bold">
+                                <span class="badge me-2" style="background-color: ${ruta.color};">${ruta.id}</span>
+                                ${ruta.nombre}
+                            </h6>
+                        </div>
+                        <p class="mb-0 small"><i class="bi bi-geo-alt"></i> ${ruta.origen} a ${ruta.destino}</p>
+                    </div>
+                `;
+
+                const polyline = L.polyline(ruta.coordenadas, {
+                    color: ruta.color,
+                    weight: 6,
+                    opacity: 0.85
+                }).addTo(map);
+
+                // Guardamos la línea dentro del objeto ruta
+                ruta.polyline = polyline;
+
+
+
+
+
+                const card = document.createElement("div");
+
+                card.className = "list-group-item route-card";
+                card.style.borderLeftColor = ruta.color;
+
+                card.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                        <h6 class="mb-0 fw-bold">
+                            <span class="badge me-2" style="background-color:${ruta.color}">
+                                ${ruta.id}
+                            </span>
+                            ${ruta.nombre}
+                        </h6>
+                    </div>
+
+                    <p class="mb-0 small">
+                        <i class="bi bi-geo-alt"></i>
+                        ${ruta.origen} a ${ruta.destino}
+                    </p>
+                `;
+
+                contenedorRutas.appendChild(card);
+
+
+
+
+                card.addEventListener("click", () => {
+
+                    // Centrar el mapa en la ruta
+                    map.fitBounds(ruta.polyline.getBounds(), {
+                        padding: [50, 50]
+                    });
+
+                    // Resaltar la ruta
+                    ruta.polyline.setStyle({
+                        weight: 10,
+                        opacity: 1
+                    });
+
+                    // Regresar al estilo original
+                    setTimeout(() => {
+                        ruta.polyline.setStyle({
+                            weight: 6,
+                            opacity: 0.85
+                        });
+                    }, 2000);
+
+                });
+
+
+
+
+
+
+
+                
+
+
+
+
+
+
+                polyline.on('click', () => {
+                    Swal.fire({
+                        title: `<h4 style="color: ${ruta.color}; margin: 0;">${ruta.nombre}</h4>`,
+                        html: `
+                            <div class="text-start mt-3">
+                                <p><i class="bi bi-signpost"></i> <strong>Recorrido:</strong> ${ruta.origen} - ${ruta.destino}</p>
+                                <p><i class="bi bi-cash-coin"></i> <strong>Costo:</strong> ${ruta.costo}</p>
+                                <p><i class="bi bi-stopwatch"></i> <strong>Frecuencia:</strong> ${ruta.frecuencia}</p>
+                            </div>
+                        `,
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: ruta.color,
+                        background: document.body.classList.contains('dark-theme') ? '#1e1e1e' : '#fff',
+                        color: document.body.classList.contains('dark-theme') ? '#e0e0e0' : '#545454'
+                    });
+                });
+            });
+
+            const grupoRutas = new L.featureGroup(Object.values(map._layers).filter(l => l instanceof L.Polyline));
+            if(rutasPublicas.length > 0) map.fitBounds(grupoRutas.getBounds());
+        });
+    </script>
 </body>
 </html>
