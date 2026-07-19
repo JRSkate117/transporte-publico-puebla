@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -80,43 +81,8 @@
   <section id="mapa" class="map-section" aria-labelledby="mapa-title">
     <h2 id="mapa-title" class="visually-hidden">Vista de mapa</h2>
     <div class="map-placeholder">
-      <svg class="map-svg" viewBox="0 0 320 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <defs>
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(236,231,221,0.05)" stroke-width="1"/>
-          </pattern>
-        </defs>
-        <rect width="320" height="220" fill="url(#grid)"/>
-
-        <path d="M40,60 L30,140" class="route-path" data-pair="huejotzingo-sanmartin"/>
-        <path d="M30,140 L140,120" class="route-path" data-pair="cholula-sanmartin"/>
-        <path d="M40,60 L140,120" class="route-path" data-pair="cholula-huejotzingo"/>
-        <path d="M140,120 L240,80" class="route-path" data-pair="cholula-puebla"/>
-        <path d="M30,140 L240,80" class="route-path" data-pair="puebla-sanmartin"/>
-        <path d="M40,60 L240,80" class="route-path" data-pair="huejotzingo-puebla"/>
-
-        <g class="map-node" data-zone="huejotzingo" transform="translate(40,60)">
-          <circle r="14" class="node-halo"/>
-          <circle r="6" class="node-dot"/>
-          <text y="-20" class="node-label">Huejotzingo</text>
-        </g>
-        <g class="map-node" data-zone="sanmartin" transform="translate(30,140)">
-          <circle r="14" class="node-halo"/>
-          <circle r="6" class="node-dot"/>
-          <text y="24" class="node-label">San Martín</text>
-        </g>
-        <g class="map-node" data-zone="cholula" transform="translate(140,120)">
-          <circle r="14" class="node-halo"/>
-          <circle r="6" class="node-dot"/>
-          <text y="24" class="node-label">Cholula</text>
-        </g>
-        <g class="map-node" data-zone="puebla" transform="translate(240,80)">
-          <circle r="16" class="node-halo"/>
-          <circle r="7" class="node-dot"/>
-          <text y="-22" class="node-label">Puebla</text>
-        </g>
-      </svg>
-      <p class="map-badge">Vista previa del corredor · Leaflet.js próximamente</p>
+      <div id="leaflet-map" class="leaflet-map" role="img" aria-label="Mapa de Puebla, Cholula, San Martín Texmelucan y Huejotzingo con puntos clave"></div>
+      <p class="map-badge">Toca un punto para usarlo como origen o destino</p>
     </div>
   </section>
 
@@ -147,6 +113,7 @@
   <p>Hecho para moverte por Puebla, Cholula, San Martín Texmelucan y Huejotzingo. Datos de referencia — confirma tarifas y horarios con el operador.</p>
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="script.js"></script>
 </body>
 </html>
