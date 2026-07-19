@@ -84,6 +84,74 @@
       <div id="leaflet-map" class="leaflet-map" role="img" aria-label="Mapa de Puebla, Cholula, San Martín Texmelucan y Huejotzingo con puntos clave"></div>
       <p class="map-badge">Toca un punto para usarlo como origen o destino</p>
     </div>
+
+    <div class="tracer">
+      <button type="button" class="tracer-toggle" id="tracer-toggle" aria-expanded="false" aria-controls="tracer-panel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+        <span>Trazar y guardar una ruta</span>
+      </button>
+
+      <div class="tracer-panel" id="tracer-panel" hidden>
+        <p class="tracer-help">Marca el camino real que sigue la combi: a mano tocando el mapa, o en vivo con GPS mientras vas arriba. Se guarda en este celular, así que la próxima vez que busques ese trayecto aquí, ya la vas a tener.</p>
+
+        <div class="tracer-mode" role="group" aria-label="Modo de trazado">
+          <button type="button" class="tracer-mode-btn is-active" data-modo="manual">A mano</button>
+          <button type="button" class="tracer-mode-btn" data-modo="gps">GPS en vivo</button>
+        </div>
+
+        <div class="tracer-controls">
+          <button type="button" class="tracer-btn tracer-btn--start" id="tracer-start">Empezar a trazar</button>
+          <button type="button" class="tracer-btn tracer-btn--undo" id="tracer-undo" hidden>Quitar último punto</button>
+          <button type="button" class="tracer-btn tracer-btn--stop" id="tracer-stop" hidden>Terminar</button>
+        </div>
+
+        <p class="tracer-status" id="tracer-status" role="status"></p>
+
+        <form class="tracer-save-form" id="tracer-save-form" hidden>
+          <div class="tracer-field">
+            <label for="tracer-nombre">Nombre de la ruta</label>
+            <input type="text" id="tracer-nombre" placeholder="Ej. Combi Mercado — Angelópolis" required>
+          </div>
+          <div class="tracer-field">
+            <label for="tracer-empresa">Empresa o línea (opcional)</label>
+            <input type="text" id="tracer-empresa" placeholder="Ej. Ruta 72 Rojos">
+          </div>
+          <div class="tracer-field-row">
+            <div class="tracer-field">
+              <label for="tracer-origen">Origen</label>
+              <select id="tracer-origen" required></select>
+            </div>
+            <div class="tracer-field">
+              <label for="tracer-destino">Destino</label>
+              <select id="tracer-destino" required></select>
+            </div>
+          </div>
+          <div class="tracer-field-row">
+            <div class="tracer-field">
+              <label for="tracer-tiempo">Tiempo aprox. en min (opcional)</label>
+              <input type="number" id="tracer-tiempo" min="0" inputmode="numeric">
+            </div>
+            <div class="tracer-field">
+              <label for="tracer-costo">Costo aprox. en $ (opcional)</label>
+              <input type="number" id="tracer-costo" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="tracer-field">
+            <label for="tracer-notas">Notas para quien la use (opcional)</label>
+            <textarea id="tracer-notas" rows="2" placeholder="Ej. Sale del mercado y da vuelta en la esquina de..."></textarea>
+          </div>
+          <div class="tracer-controls">
+            <button type="submit" class="tracer-btn tracer-btn--save">Guardar en este celular</button>
+            <button type="button" class="tracer-btn tracer-btn--cancel" id="tracer-cancel">Cancelar</button>
+          </div>
+        </form>
+
+        <div class="tracer-saved" id="tracer-saved" hidden>
+          <h3>Tus rutas guardadas</h3>
+          <ul class="tracer-saved-list" id="tracer-saved-list"></ul>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section id="resultados" class="results-section" aria-labelledby="resultados-title" aria-live="polite">
