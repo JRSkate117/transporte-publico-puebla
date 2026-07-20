@@ -8,6 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -22,10 +25,14 @@
             </button>
         </div>
     </nav>
+    <div class="azulejo-strip"></div>
 
     <div class="app-container">
         <aside class="sidebar p-3">
-            <h5 class="mb-4 fw-bold">Rutas Disponibles</h5>
+            <div class="sidebar-header">
+                <h5 class="mb-1 fw-bold">Rutas Disponibles</h5>
+                <p class="sidebar-subtitle mb-3">Toca una ruta para mostrarla u ocultarla en el mapa</p>
+            </div>
             <div id="lista-rutas" class="list-group">
                 </div>
         </aside>
@@ -89,30 +96,16 @@
             const contenedorRutas = document.getElementById('lista-rutas');
 
             rutasPublicas.forEach(ruta => {
-                contenedorRutas.innerHTML += `
-                    <div class="list-group-item route-card" style="border-left-color: ${ruta.color};">
-                        <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                            <h6 class="mb-0 fw-bold">
-                                <span class="badge me-2" style="background-color: ${ruta.color};">${ruta.id}</span>
-                                ${ruta.nombre}
-                            </h6>
-                        </div>
-                        <p class="mb-0 small"><i class="bi bi-geo-alt"></i> ${ruta.origen} a ${ruta.destino}</p>
-                    </div>
-                `;
-
+                // Creamos la polyline pero NO la agregamos al mapa todavía
+                // (.addTo(map) se llama solo cuando el usuario selecciona la ruta)
                 const polyline = L.polyline(ruta.coordenadas, {
                     color: ruta.color,
                     weight: 6,
                     opacity: 0.85
-                }).addTo(map);
+                });
 
                 // Guardamos la línea dentro del objeto ruta
                 ruta.polyline = polyline;
-
-
-
-
 
                 const card = document.createElement("div");
 
@@ -137,17 +130,27 @@
 
                 contenedorRutas.appendChild(card);
 
-
-
-
                 card.addEventListener("click", () => {
 
-                    // Centrar el mapa en la ruta
+                    const yaEstaEnMapa = map.hasLayer(ruta.polyline);
+
+                    if (yaEstaEnMapa) {
+                        // La ruta ya estaba visible: la quitamos del mapa
+                        map.removeLayer(ruta.polyline);
+                        card.classList.remove('active');
+                        return;
+                    }
+
+                    // La ruta no estaba visible: la agregamos al mapa
+                    ruta.polyline.addTo(map);
+                    card.classList.add('active');
+
+                    // Centrar el mapa en la ruta recién agregada
                     map.fitBounds(ruta.polyline.getBounds(), {
                         padding: [50, 50]
                     });
 
-                    // Resaltar la ruta
+                    // Resaltar la ruta brevemente para que se note cuál se agregó
                     ruta.polyline.setStyle({
                         weight: 10,
                         opacity: 1
@@ -163,19 +166,6 @@
 
                 });
 
-
-
-
-
-
-
-                
-
-
-
-
-
-
                 polyline.on('click', () => {
                     Swal.fire({
                         title: `<h4 style="color: ${ruta.color}; margin: 0;">${ruta.nombre}</h4>`,
@@ -188,14 +178,21 @@
                         `,
                         confirmButtonText: 'Entendido',
                         confirmButtonColor: ruta.color,
-                        background: document.body.classList.contains('dark-theme') ? '#1e1e1e' : '#fff',
-                        color: document.body.classList.contains('dark-theme') ? '#e0e0e0' : '#545454'
+                        background: document.body.classList.contains('dark-theme') ? '#16213D' : '#ffffff',
+                        color: document.body.classList.contains('dark-theme') ? '#E7ECF7' : '#16233F'
                     });
                 });
             });
 
-            const grupoRutas = new L.featureGroup(Object.values(map._layers).filter(l => l instanceof L.Polyline));
-            if(rutasPublicas.length > 0) map.fitBounds(grupoRutas.getBounds());
+            // 6. Buscador: filtra las tarjetas de rutas por nombre, origen o destino
+            const inputBusqueda = document.querySelector('.floating-search input');
+            inputBusqueda.addEventListener('input', (e) => {
+                const termino = e.target.value.trim().toLowerCase();
+                document.querySelectorAll('.route-card').forEach(card => {
+                    const texto = card.textContent.toLowerCase();
+                    card.style.display = texto.includes(termino) ? '' : 'none';
+                });
+            });
         });
     </script>
 </body>
