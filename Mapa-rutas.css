@@ -1,0 +1,156 @@
+:root {
+    --primary-color: #0066CC;
+    --white: #FFFFFF;
+    --light-gray: #f8f9fa;
+    --green-active: #28a745;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--light-gray);
+}
+
+.bg-primary-custom {
+    background-color: var(--primary-color) !important;
+}
+
+.btn-primary-custom {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+}
+
+.btn-primary-custom:hover {
+    background-color: #0052a3;
+    color: var(--white);
+}
+
+/* App Layout */
+.app-container {
+    display: flex;
+    height: calc(100vh - 56px); /* Resta la altura del Navbar */
+    margin-top: 56px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 350px;
+    height: 100%;
+    overflow-y: auto;
+    z-index: 1000; /* Por encima del mapa */
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.route-card {
+    border-left: 4px solid var(--primary-color);
+    transition: transform 0.2s;
+}
+
+.route-card:hover {
+    transform: translateX(5px);
+    cursor: pointer;
+}
+
+/* Map Area */
+.map-container {
+    flex-grow: 1;
+    position: relative;
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+/* Floating Search */
+.floating-search {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    max-width: 600px;
+    background: var(--white);
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 1000;
+}
+
+/* Loader */
+.loader-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.8);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column-reverse;
+    }
+    .sidebar {
+        width: 100%;
+        height: 40%;
+    }
+    .map-container {
+        height: 60%;
+    }
+    .floating-search {
+        width: 90%;
+        top: 10px;
+    }
+}
+
+/* ============================================
+   TEMA OSCURO
+   ============================================ */
+body.dark-theme {
+    background-color: #0F1626;
+    color: #E7ECF7;
+}
+body.dark-theme .navbar {
+    background-color: #16213D !important;
+}
+body.dark-theme .sidebar {
+    background-color: #16213D;
+    color: #E7ECF7;
+    border-right: 1px solid #223055;
+}
+body.dark-theme .sidebar-subtitle {
+    color: #8A93A6;
+}
+body.dark-theme .list-group-item,
+body.dark-theme .route-card {
+    background-color: #1B2A4A;
+    color: #E7ECF7;
+    border-color: #223055;
+}
+body.dark-theme .route-card:hover {
+    background-color: #223055;
+}
+body.dark-theme .floating-search {
+    background: #16213D;
+}
+body.dark-theme .floating-search .form-control {
+    background-color: #1B2A4A;
+    color: #E7ECF7;
+    border-color: #223055;
+}
+body.dark-theme .floating-search .form-control::placeholder {
+    color: #8A93A6;
+}
+body.dark-theme .btn-outline-light {
+    border-color: #3A4A73;
+}
