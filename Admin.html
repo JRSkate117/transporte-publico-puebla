@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panel del operador · ¿A dónde vas?</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#10151C">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+
+<!-- ============================================
+     PANTALLA DE ACCESO (solo admin/operador)
+     ============================================ -->
+<div class="admin-gate" id="admin-gate">
+  <form class="admin-gate-card" id="admin-gate-form">
+    <p class="eyebrow">Acceso restringido</p>
+    <h1>Panel del operador</h1>
+    <p class="admin-gate-help">Aquí se trazan y guardan las rutas reales de combi. Solo para el equipo que administra ¿A dónde vas?</p>
+
+    <label for="admin-password">Contraseña</label>
+    <input type="password" id="admin-password" autocomplete="current-password" required>
+
+    <button type="submit" class="btn-buscar">Entrar</button>
+    <p class="admin-gate-error" id="admin-gate-error" role="alert" hidden>Contraseña incorrecta. Inténtalo otra vez.</p>
+    <a class="admin-gate-back" href="index.html">← Volver al buscador público</a>
+  </form>
+</div>
+
+<!-- ============================================
+     PANEL (visible solo tras iniciar sesión)
+     ============================================ -->
+<div class="admin-app" id="admin-app" hidden>
+
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <div>
+        <p class="eyebrow">Panel del operador</p>
+        <h1>Trazar y publicar rutas</h1>
+      </div>
+      <div class="admin-header-actions">
+        <a href="index.html" class="admin-link-btn">Ver buscador público</a>
+        <button type="button" class="admin-link-btn admin-link-btn--danger" id="admin-logout">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+
+    <section id="mapa" class="map-section" aria-labelledby="mapa-title">
+      <h2 id="mapa-title" class="visually-hidden">Mapa de trazado</h2>
+      <div class="map-placeholder">
+        <div id="leaflet-map" class="leaflet-map" role="img" aria-label="Mapa de Puebla, Cholula, San Martín Texmelucan y Huejotzingo con puntos clave"></div>
+        <p class="map-badge">Los puntos de referencia ya están marcados</p>
+      </div>
+
+      <div class="tracer">
+        <button type="button" class="tracer-toggle" id="tracer-toggle" aria-expanded="true" aria-controls="tracer-panel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+          <span>Trazar y guardar una ruta</span>
+        </button>
+
+        <div class="tracer-panel" id="tracer-panel">
+          <p class="tracer-help">Marca el camino real que sigue la combi: a mano tocando el mapa, o en vivo con GPS mientras vas arriba. Se guarda en este navegador/dispositivo.</p>
+
+          <div class="tracer-mode" role="group" aria-label="Modo de trazado">
+            <button type="button" class="tracer-mode-btn is-active" data-modo="manual">A mano</button>
+            <button type="button" class="tracer-mode-btn" data-modo="gps">GPS en vivo</button>
+          </div>
+
+          <div class="tracer-controls">
+            <button type="button" class="tracer-btn tracer-btn--start" id="tracer-start">Empezar a trazar</button>
+            <button type="button" class="tracer-btn tracer-btn--undo" id="tracer-undo" hidden>Quitar último punto</button>
+            <button type="button" class="tracer-btn tracer-btn--stop" id="tracer-stop" hidden>Terminar</button>
+          </div>
+
+          <p class="tracer-status" id="tracer-status" role="status"></p>
+
+          <form class="tracer-save-form" id="tracer-save-form" hidden>
+            <div class="tracer-field">
+              <label for="tracer-nombre">Nombre de la ruta</label>
+              <input type="text" id="tracer-nombre" placeholder="Ej. Combi Mercado — Angelópolis" required>
+            </div>
+            <div class="tracer-field">
+              <label for="tracer-empresa">Empresa o línea (opcional)</label>
+              <input type="text" id="tracer-empresa" placeholder="Ej. Ruta 72 Rojos">
+            </div>
+            <div class="tracer-field-row">
+              <div class="tracer-field">
+                <label for="tracer-origen">Origen</label>
+                <select id="tracer-origen" required></select>
+              </div>
+              <div class="tracer-field">
+                <label for="tracer-destino">Destino</label>
+                <select id="tracer-destino" required></select>
+              </div>
+            </div>
+            <div class="tracer-field-row">
+              <div class="tracer-field">
+                <label for="tracer-tiempo">Tiempo aprox. en min (opcional)</label>
+                <input type="number" id="tracer-tiempo" min="0" inputmode="numeric">
+              </div>
+              <div class="tracer-field">
+                <label for="tracer-costo">Costo aprox. en $ (opcional)</label>
+                <input type="number" id="tracer-costo" min="0" inputmode="numeric">
+              </div>
+            </div>
+            <div class="tracer-field">
+              <label for="tracer-notas">Notas para quien la use (opcional)</label>
+              <textarea id="tracer-notas" rows="2" placeholder="Ej. Sale del mercado y da vuelta en la esquina de..."></textarea>
+            </div>
+            <div class="tracer-controls">
+              <button type="submit" class="tracer-btn tracer-btn--save">Guardar en este navegador</button>
+              <button type="button" class="tracer-btn tracer-btn--cancel" id="tracer-cancel">Cancelar</button>
+            </div>
+          </form>
+
+          <div class="tracer-saved" id="tracer-saved" hidden>
+            <h3>Rutas guardadas en este navegador</h3>
+            <ul class="tracer-saved-list" id="tracer-saved-list"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-export-info">
+      <h2>¿Cómo llega esto al público?</h2>
+      <p>Lo que trazas aquí se guarda solo en este navegador — no se comparte solo automáticamente con quien busca en la app pública desde su propio celular. Para publicarlo de verdad para todos:</p>
+      <ol>
+        <li>Traza y guarda la ruta arriba.</li>
+        <li>En la lista de "Rutas guardadas", dale <strong>"Copiar para rutas.js"</strong>.</li>
+        <li>Pega ese bloque dentro del arreglo <code>rutasPublicas</code> en <code>rutas.js</code> y vuelve a publicar el sitio.</li>
+      </ol>
+      <p class="admin-export-note">Mientras tanto, si buscas en la app pública desde este mismo navegador, sí vas a ver la tarjeta "Recorrido verificado" para esa ruta — es una vista previa de operador, no lo que ven los demás usuarios todavía.</p>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="admin.js"></script>
+</body>
+</html>
