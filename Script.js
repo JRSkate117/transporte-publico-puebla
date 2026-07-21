@@ -172,18 +172,6 @@ function escapeHTML(str){
   return div.innerHTML;
 }
 
-/* distancia en metros entre dos coordenadas (fórmula haversine),
-   usada para no guardar puntos GPS demasiado pegados entre sí */
-function distanciaMetros([lat1, lng1], [lat2, lng2]){
-  const R = 6371000;
-  const toRad = d => d * Math.PI / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 function buscarPuntos(query, zonaPreferida){
   const q = normalizar(query);
   let resultados = PUNTOS.filter(p => normalizar(p.nombre).includes(q));
@@ -215,91 +203,11 @@ zoneChips.forEach(chip => {
     chip.classList.add("is-active");
     chip.setAttribute("aria-pressed", "true");
     state.zonaActiva = chip.dataset.zone;
-    volarAZona(state.zonaActiva);
   });
 });
-
-/* ----------------------------------------------------------
-   6) MAPA REAL — Leaflet + OpenStreetMap
-   ---------------------------------------------------------- */
-const map = L.map("leaflet-map", {
-  scrollWheelZoom: false,
-}).setView([19.09, -98.32], 11);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 18,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-}).addTo(map);
-
-const marcadoresPorId = {};
-
-PUNTOS.forEach(punto => {
-  const icon = L.divIcon({
-    className: "punto-marker",
-    html: `<span class="punto-dot" style="background:${COLOR_ZONA[punto.zona]}"></span>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-  });
-  const marker = L.marker([punto.lat, punto.lng], { icon, title: punto.nombre });
-  marker.bindPopup(`<strong>${punto.nombre}</strong><br>${ZONAS[punto.zona]} · ${punto.tipo}`);
-  marker.on("click", () => seleccionarDesdeMapa(punto));
-  marker.addTo(map);
-  marcadoresPorId[punto.id] = marker;
-});
-
-let rutaPolyline = null;
-let rutaGuardadaPolyline = null;
-
-function trazarRutaEnMapa(origen, destino){
-  if (rutaPolyline){ map.removeLayer(rutaPolyline); rutaPolyline = null; }
-  rutaPolyline = L.polyline(
-    [[origen.lat, origen.lng], [destino.lat, destino.lng]],
-    { color: "#F2A73B", weight: 3, dashArray: "2 10", opacity: 0.9, lineCap: "round" }
-  ).addTo(map);
-  const bounds = rutaPolyline.getBounds();
-  map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-}
-
-function limpiarRutaGuardadaMapa(){
-  if (rutaGuardadaPolyline){ map.removeLayer(rutaGuardadaPolyline); rutaGuardadaPolyline = null; }
-}
-
-function trazarRutaGuardadaEnMapa(puntos, extenderBounds){
-  limpiarRutaGuardadaMapa();
-  rutaGuardadaPolyline = L.polyline(puntos, {
-    color: "#4FAE7E", weight: 4, opacity: 0.95, lineCap: "round", lineJoin: "round",
-  }).addTo(map);
-  if (extenderBounds !== false){
-    map.fitBounds(rutaGuardadaPolyline.getBounds(), { padding: [40, 40], maxZoom: 15 });
-  }
-}
-
-/* clic en un marcador: llena Origen si está vacío, si no Destino;
-   si ambos están llenos, reinicia usando ese punto como nuevo origen */
-function seleccionarDesdeMapa(punto){
-  if (!state.origen){
-    asignarPunto("origen", punto);
-  } else if (!state.destino){
-    if (punto.id === state.origen.id) return;
-    asignarPunto("destino", punto);
-  } else {
-    asignarPunto("origen", punto);
-    asignarPunto("destino", null);
-  }
-  marcadoresPorId[punto.id]?.openPopup();
-}
-
-/* el chip de zona ahora hace que el mapa "vuele" a esa zona,
-   sin excluir resultados de las otras */
-function volarAZona(zona){
-  const c = ZONA_CENTRO[zona];
-  if (c) map.flyTo([c.lat, c.lng], c.zoom, { duration: 0.8 });
-}
-volarAZona(state.zonaActiva);
 
 /* asigna (o limpia) un punto de origen/destino, sincronizando
-   estado + input de texto + botón de limpiar, sin importar si
-   vino del autocompletado o de un clic en el mapa */
+   estado + input de texto + botón de limpiar */
 function asignarPunto(stateKey, punto){
   state[stateKey] = punto;
   const input = document.getElementById(stateKey);
@@ -310,7 +218,7 @@ function asignarPunto(stateKey, punto){
 }
 
 /* ----------------------------------------------------------
-   7) AUTOCOMPLETADO
+   6) AUTOCOMPLETADO
    ---------------------------------------------------------- */
 function configurarAutocompletado(inputId, listId, stateKey){
   const input = document.getElementById(inputId);
@@ -492,6 +400,10 @@ function crearTarjeta({ label, claseTag, unidad, key, opcion }){
       <summary>Ver instrucciones</summary>
       <ol>${opcion.pasos.map(p => `<li>${p}</li>`).join("")}</ol>
     </details>
+
+    <a class="card-recorrido-btn" href="mapa-rutas.html" target="_blank" rel="noopener">
+      📍 Pica aquí si quieres ver el recorrido
+    </a>
   `;
   return card;
 }
@@ -537,6 +449,10 @@ function crearTarjetaGuardada(rutaGuardada){
       <summary>Ver instrucciones</summary>
       <ol>${pasos.map(p => `<li>${escapeHTML(p)}</li>`).join("")}</ol>
     </details>
+
+    <a class="card-recorrido-btn" href="mapa-rutas.html?ruta=${encodeURIComponent(rutaGuardada.id)}" target="_blank" rel="noopener">
+      📍 Pica aquí si quieres ver el recorrido
+    </a>
   `;
   return card;
 }
@@ -550,20 +466,16 @@ form.addEventListener("submit", (e) => {
   void connectorBus.offsetWidth; // reinicia animación
   connectorBus.classList.add("is-traveling");
 
-  trazarRutaEnMapa(state.origen, state.destino);
-
   const opciones = obtenerOpciones(state.origen.zona, state.destino.zona);
   const seleccion = elegirPorCategoria(opciones);
 
   cardsGrid.innerHTML = "";
   seleccion.forEach(item => cardsGrid.appendChild(crearTarjeta(item)));
 
-  // si el usuario ya trazó y guardó este trayecto antes, lo mostramos primero
+  // si el operador (admin) ya trazó y guardó este trayecto, lo mostramos primero
   const guardada = buscarRutaGuardadaCoincidente(state.origen.id, state.destino.id);
-  limpiarRutaGuardadaMapa();
   if (guardada){
     cardsGrid.prepend(crearTarjetaGuardada(guardada));
-    trazarRutaGuardadaEnMapa(guardada.puntos, false);
   }
 
   resultOrigin.textContent = state.origen.nombre;
@@ -576,10 +488,10 @@ form.addEventListener("submit", (e) => {
 });
 
 /* ----------------------------------------------------------
-   10) TRAZAR Y GUARDAR RUTAS DE COMBI (a mano o con GPS)
-   Se guardan en este celular con localStorage: la próxima vez
-   que alguien busque el mismo origen→destino en este mismo
-   dispositivo, su ruta trazada ya aparece.
+   10) LECTURA DE RUTAS TRAZADAS POR EL ADMIN (solo lectura)
+   El panel admin (admin.html) es quien traza y guarda con GPS
+   o a mano; aquí solo leemos ese localStorage para mostrar la
+   tarjeta especial "Recorrido verificado" cuando coincide.
    ---------------------------------------------------------- */
 const LS_KEY = "adondevas_rutas_trazadas_v1";
 
@@ -593,279 +505,9 @@ function cargarRutasTrazadas(){
   }
 }
 
-function guardarRutasTrazadas(lista){
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(lista));
-    return true;
-  } catch (err) {
-    console.warn("No se pudo guardar en este navegador:", err);
-    return false;
-  }
-}
-
 function buscarRutaGuardadaCoincidente(origenId, destinoId){
   const lista = cargarRutasTrazadas();
   return lista.find(r => r.origenId === origenId && r.destinoId === destinoId)
       || lista.find(r => r.origenId === destinoId && r.destinoId === origenId)
       || null;
 }
-
-/* ---- referencias del DOM ---- */
-const tracerToggle   = document.getElementById("tracer-toggle");
-const tracerPanel    = document.getElementById("tracer-panel");
-const tracerModeBtns = document.querySelectorAll(".tracer-mode-btn");
-const tracerStartBtn = document.getElementById("tracer-start");
-const tracerUndoBtn  = document.getElementById("tracer-undo");
-const tracerStopBtn  = document.getElementById("tracer-stop");
-const tracerStatus   = document.getElementById("tracer-status");
-const tracerSaveForm = document.getElementById("tracer-save-form");
-const tracerCancelBtn= document.getElementById("tracer-cancel");
-const tracerOrigenSel = document.getElementById("tracer-origen");
-const tracerDestinoSel= document.getElementById("tracer-destino");
-const tracerSavedWrap = document.getElementById("tracer-saved");
-const tracerSavedList = document.getElementById("tracer-saved-list");
-
-/* llena los <select> de origen/destino del formulario de guardado */
-function poblarSelectsTrazado(){
-  const opciones = PUNTOS
-    .map(p => `<option value="${p.id}">${escapeHTML(p.nombre)} · ${ZONAS[p.zona]}</option>`)
-    .join("");
-  tracerOrigenSel.innerHTML = opciones;
-  tracerDestinoSel.innerHTML = opciones;
-}
-
-const tracerState = {
-  modo: "manual",       // "manual" | "gps"
-  activo: false,
-  puntos: [],            // [[lat,lng], ...]
-  polyline: null,
-  gpsWatchId: null,
-  gpsMarker: null,
-};
-
-function tracerDibujarPolyline(){
-  if (tracerState.polyline){ map.removeLayer(tracerState.polyline); tracerState.polyline = null; }
-  if (tracerState.puntos.length < 2) return;
-  tracerState.polyline = L.polyline(tracerState.puntos, {
-    color: "#4FAE7E", weight: 4, opacity: 0.95, dashArray: tracerState.modo === "gps" ? null : "1 8",
-  }).addTo(map);
-}
-
-function tracerAgregarPunto(latlng){
-  tracerState.puntos.push(latlng);
-  tracerDibujarPolyline();
-  tracerStatus.textContent = `${tracerState.puntos.length} punto${tracerState.puntos.length === 1 ? "" : "s"} marcado${tracerState.puntos.length === 1 ? "" : "s"}.`;
-  tracerUndoBtn.hidden = tracerState.modo !== "manual" || tracerState.puntos.length === 0;
-}
-
-function tracerClickMapa(e){
-  if (!tracerState.activo || tracerState.modo !== "manual") return;
-  tracerAgregarPunto([e.latlng.lat, e.latlng.lng]);
-}
-
-/* ---- modo: cambiar entre "a mano" y "GPS en vivo" ---- */
-tracerModeBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    if (tracerState.activo) return; // no cambiar de modo a medio trazo
-    tracerModeBtns.forEach(b => b.classList.toggle("is-active", b === btn));
-    tracerState.modo = btn.dataset.modo;
-    tracerStatus.textContent = tracerState.modo === "gps"
-      ? "Cuando empieces, iremos guardando tu ubicación mientras avanza la combi."
-      : "Cuando empieces, toca el mapa para ir marcando el camino.";
-  });
-});
-
-/* ---- abrir/cerrar panel ---- */
-tracerToggle.addEventListener("click", () => {
-  const abierto = tracerPanel.hidden;
-  tracerPanel.hidden = !abierto;
-  tracerToggle.setAttribute("aria-expanded", String(abierto));
-  if (abierto) renderRutasGuardadas();
-});
-
-/* ---- empezar a trazar ---- */
-tracerStartBtn.addEventListener("click", () => {
-  tracerState.activo = true;
-  tracerState.puntos = [];
-  tracerDibujarPolyline();
-  tracerStartBtn.hidden = true;
-  tracerStopBtn.hidden = false;
-  tracerModeBtns.forEach(b => b.disabled = true);
-  tracerSaveForm.hidden = true;
-  tracerSavedWrap.hidden = true;
-
-  if (tracerState.modo === "manual"){
-    map.on("click", tracerClickMapa);
-    tracerUndoBtn.hidden = false;
-    tracerStatus.textContent = "Toca el mapa para ir marcando el camino de la combi.";
-  } else {
-    tracerUndoBtn.hidden = true;
-    if (!("geolocation" in navigator)){
-      tracerStatus.textContent = "Este navegador no puede usar el GPS. Prueba con el modo a mano.";
-      return;
-    }
-    tracerStatus.textContent = "Buscando señal de GPS…";
-    tracerState.gpsWatchId = navigator.geolocation.watchPosition(
-      (pos) => {
-        const punto = [pos.coords.latitude, pos.coords.longitude];
-        const ultimo = tracerState.puntos[tracerState.puntos.length - 1];
-        if (!tracerState.gpsMarker){
-          tracerState.gpsMarker = L.circleMarker(punto, {
-            radius: 7, color: "#4FAE7E", fillColor: "#4FAE7E", fillOpacity: 0.9, weight: 2,
-          }).addTo(map);
-        } else {
-          tracerState.gpsMarker.setLatLng(punto);
-        }
-        map.panTo(punto);
-        if (!ultimo || distanciaMetros(ultimo, punto) >= 20){
-          tracerAgregarPunto(punto);
-        }
-      },
-      (err) => {
-        tracerStatus.textContent = "No se pudo acceder al GPS: " + (err.message || "permiso denegado.");
-      },
-      { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
-    );
-  }
-});
-
-/* ---- quitar el último punto marcado (modo manual) ---- */
-tracerUndoBtn.addEventListener("click", () => {
-  tracerState.puntos.pop();
-  tracerDibujarPolyline();
-  tracerStatus.textContent = `${tracerState.puntos.length} punto${tracerState.puntos.length === 1 ? "" : "s"} marcado${tracerState.puntos.length === 1 ? "" : "s"}.`;
-});
-
-/* ---- terminar de trazar ---- */
-tracerStopBtn.addEventListener("click", () => {
-  tracerState.activo = false;
-  map.off("click", tracerClickMapa);
-  if (tracerState.gpsWatchId != null){
-    navigator.geolocation.clearWatch(tracerState.gpsWatchId);
-    tracerState.gpsWatchId = null;
-  }
-  if (tracerState.gpsMarker){ map.removeLayer(tracerState.gpsMarker); tracerState.gpsMarker = null; }
-
-  tracerStartBtn.hidden = false;
-  tracerStopBtn.hidden = true;
-  tracerUndoBtn.hidden = true;
-  tracerModeBtns.forEach(b => b.disabled = false);
-
-  if (tracerState.puntos.length < 2){
-    tracerStatus.textContent = "Necesitas al menos dos puntos para guardar una ruta. Inténtalo de nuevo.";
-    if (tracerState.polyline){ map.removeLayer(tracerState.polyline); tracerState.polyline = null; }
-    tracerState.puntos = [];
-    return;
-  }
-
-  tracerStatus.textContent = "Listo. Ponle nombre a tu ruta y guárdala.";
-  poblarSelectsTrazado();
-  tracerSaveForm.hidden = false;
-  tracerSaveForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
-});
-
-/* ---- guardar la ruta trazada ---- */
-tracerSaveForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const origenId = tracerOrigenSel.value;
-  const destinoId = tracerDestinoSel.value;
-  if (origenId === destinoId){
-    tracerStatus.textContent = "Elige un origen y un destino distintos.";
-    return;
-  }
-
-  const nombre = document.getElementById("tracer-nombre").value.trim();
-  const empresa = document.getElementById("tracer-empresa").value.trim();
-  const tiempoRaw = document.getElementById("tracer-tiempo").value;
-  const costoRaw = document.getElementById("tracer-costo").value;
-  const notas = document.getElementById("tracer-notas").value.trim();
-
-  const nuevaRuta = {
-    id: "rt-" + Date.now(),
-    nombre: nombre || "Ruta guardada",
-    empresa,
-    origenId,
-    destinoId,
-    tiempo: tiempoRaw ? Number(tiempoRaw) : null,
-    costo: costoRaw ? Number(costoRaw) : null,
-    notas,
-    modo: tracerState.modo,
-    puntos: tracerState.puntos,
-    creado: new Date().toISOString(),
-  };
-
-  const lista = cargarRutasTrazadas();
-  lista.push(nuevaRuta);
-  const ok = guardarRutasTrazadas(lista);
-
-  tracerSaveForm.reset();
-  tracerSaveForm.hidden = true;
-  if (tracerState.polyline){ map.removeLayer(tracerState.polyline); tracerState.polyline = null; }
-  tracerState.puntos = [];
-
-  tracerStatus.textContent = ok
-    ? "Ruta guardada en este celular. La verás la próxima vez que busques este trayecto."
-    : "No se pudo guardar (este navegador bloquea el almacenamiento local).";
-
-  renderRutasGuardadas();
-});
-
-/* ---- cancelar el trazo actual ---- */
-tracerCancelBtn.addEventListener("click", () => {
-  tracerSaveForm.reset();
-  tracerSaveForm.hidden = true;
-  if (tracerState.polyline){ map.removeLayer(tracerState.polyline); tracerState.polyline = null; }
-  tracerState.puntos = [];
-  tracerStatus.textContent = "Trazo descartado.";
-});
-
-/* ---- lista de "Tus rutas guardadas" ---- */
-function nombrePunto(id){
-  return PUNTOS.find(p => p.id === id)?.nombre || "Punto eliminado";
-}
-
-function renderRutasGuardadas(){
-  const lista = cargarRutasTrazadas();
-  tracerSavedWrap.hidden = lista.length === 0;
-  tracerSavedList.innerHTML = "";
-
-  lista.slice().reverse().forEach(ruta => {
-    const li = document.createElement("li");
-    li.className = "tracer-saved-item";
-    const modoLabel = ruta.modo === "gps" ? "📡 GPS" : "✍️ A mano";
-    li.innerHTML = `
-      <div class="tracer-saved-info">
-        <strong>${escapeHTML(ruta.nombre)}</strong>
-        <span>${escapeHTML(nombrePunto(ruta.origenId))} → ${escapeHTML(nombrePunto(ruta.destinoId))}</span>
-        <span class="tracer-saved-meta">${modoLabel} · ${ruta.puntos.length} puntos</span>
-      </div>
-      <div class="tracer-saved-actions">
-        <button type="button" class="tracer-mini-btn" data-accion="ver" data-id="${ruta.id}">Ver en mapa</button>
-        <button type="button" class="tracer-mini-btn tracer-mini-btn--danger" data-accion="eliminar" data-id="${ruta.id}">Eliminar</button>
-      </div>
-    `;
-    tracerSavedList.appendChild(li);
-  });
-}
-
-tracerSavedList.addEventListener("click", (e) => {
-  const btn = e.target.closest(".tracer-mini-btn");
-  if (!btn) return;
-  const { accion, id } = btn.dataset;
-  const lista = cargarRutasTrazadas();
-  const ruta = lista.find(r => r.id === id);
-  if (!ruta) return;
-
-  if (accion === "ver"){
-    trazarRutaGuardadaEnMapa(ruta.puntos, true);
-    document.getElementById("mapa").scrollIntoView({ behavior: "smooth", block: "start" });
-  } else if (accion === "eliminar"){
-    const confirmar = window.confirm(`¿Eliminar "${ruta.nombre}" de tus rutas guardadas?`);
-    if (!confirmar) return;
-    guardarRutasTrazadas(lista.filter(r => r.id !== id));
-    renderRutasGuardadas();
-  }
-});
-
-/* estado inicial del panel de trazado */
-renderRutasGuardadas();
