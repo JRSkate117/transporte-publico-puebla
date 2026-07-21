@@ -1,0 +1,324 @@
+/* ===========================
+   PÁGINA PRINCIPAL
+=========================== */
+
+:root {
+    --cobalto: #1B3B7A;
+    --cobalto-claro: #3D63B0;
+    --marigold: #E89B3C;
+    --verde-talavera: #4C7A5E;
+
+    --bg-color: #F4F6FA;
+    --sidebar-bg: #FFFFFF;
+    --text-main: #16233F;
+    --text-muted: #5B6B8C;
+    --card-border: #E3E8F2;
+    --card-hover: #EEF2FA;
+    --input-bg: #FFFFFF;
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Work Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+}
+
+body.dark-theme {
+    --bg-color: #10192E;
+    --sidebar-bg: #16213D;
+    --text-main: #E7ECF7;
+    --text-muted: #92A0C2;
+    --card-border: #26365C;
+    --card-hover: #1E2C4E;
+    --input-bg: #1C2A4A;
+}
+
+body, html {
+    min-height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    font-family: var(--font-body);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+    background-color: var(--cobalto) !important;
+}
+
+.navbar-brand {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+}
+
+#btnThemeToggle {
+    border-color: rgba(255,255,255,0.5);
+}
+#btnThemeToggle:hover {
+    background-color: var(--marigold);
+    border-color: var(--marigold);
+    color: var(--cobalto);
+}
+
+/* Franja distintiva bajo el navbar: retícula geométrica
+   inspirada en el trazo de la talavera poblana */
+.azulejo-strip {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    height: 10px;
+    z-index: 1001;
+    background-color: var(--cobalto);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Cpath d='M0 10 L10 0 L20 10 L10 20 Z' fill='none' stroke='%233D63B0' stroke-width='1.2' opacity='0.9'/%3E%3Ccircle cx='20' cy='10' r='1.6' fill='%23E89B3C'/%3E%3Cpath d='M20 10 L30 0 L40 10 L30 20 Z' fill='none' stroke='%233D63B0' stroke-width='1.2' opacity='0.9'/%3E%3Ccircle cx='0' cy='10' r='1.6' fill='%23E89B3C'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 40px 10px;
+}
+
+/* Responsive: en pantallas angostas, el panel pasa a ocupar
+   todo el ancho y el mapa queda debajo, en vez de forzar 380px fijos */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: 40vh;
+    }
+
+    .map-container {
+        height: 60vh;
+    }
+
+    #map {
+        height: 60vh;
+    }
+}
+
+/* ===========================
+   PÁGINA PRINCIPAL
+=========================== */
+
+.app-container{
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 120px 25px 50px;
+}
+
+/* HERO */
+
+.hero-section{
+    text-align: center;
+    padding: 50px 0;
+}
+
+.hero-title{
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.hero-title i{
+    color:#3b82f6;
+}
+
+.hero-subtitle{
+    font-size:1.1rem;
+    color:var(--text-secondary);
+    margin-bottom:40px;
+}
+
+.search-box{
+    max-width:900px;
+    margin:auto;
+}
+
+.search-box .form-control{
+    height:55px;
+    border-radius:12px;
+    border:none;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+
+.search-box .btn{
+    height:55px;
+    border-radius:12px;
+    font-weight:600;
+}
+
+/* TITULOS */
+
+.section-title{
+    font-size:2rem;
+    font-weight:700;
+    margin-bottom:20px;
+    color:var(--text-color);
+}
+
+/* TARJETAS */
+
+.feature-card,
+.route-card,
+.info-card{
+
+    border:none;
+    border-radius:18px;
+    padding:25px;
+    height:100%;
+    transition:.3s;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+
+}
+
+.feature-card:hover,
+.route-card:hover,
+.info-card:hover{
+
+    transform:translateY(-8px);
+
+}
+
+.feature-icon{
+
+    font-size:3rem;
+    color:#3b82f6;
+    margin-bottom:15px;
+
+}
+
+.feature-card h5{
+
+    font-weight:700;
+    margin-bottom:10px;
+
+}
+
+.feature-card p{
+
+    color:var(--text-secondary);
+
+}
+
+/* RUTAS */
+
+.route-card h4{
+
+    font-weight:700;
+
+}
+
+.route-card p{
+
+    color:var(--text-secondary);
+
+}
+
+/* ESTADÍSTICAS */
+
+.stats-section{
+
+    margin-top:70px;
+    margin-bottom:40px;
+    padding:45px;
+    border-radius:20px;
+    background:linear-gradient(135deg,#1e3a8a,#2563eb);
+    color:white;
+
+}
+
+.stats-section h2{
+
+    font-size:3rem;
+    font-weight:700;
+
+}
+
+.stats-section p{
+
+    font-size:1.1rem;
+    margin-top:10px;
+
+}
+
+/* INFORMACIÓN */
+
+.info-card h3{
+
+    margin-bottom:20px;
+    font-weight:700;
+
+}
+
+.info-card ul{
+
+    padding-left:20px;
+
+}
+
+.info-card li{
+
+    margin-bottom:12px;
+
+}
+
+/* FOOTER */
+
+.footer{
+
+    margin-top:80px;
+    padding:35px 20px;
+    text-align:center;
+    border-top:1px solid rgba(255,255,255,.08);
+
+}
+
+.footer h5{
+
+    font-weight:700;
+    margin-bottom:10px;
+
+}
+
+.footer p{
+
+    color:var(--text-secondary);
+
+}
+
+/* ===========================
+   MODO OSCURO
+=========================== */
+
+body.dark-theme .feature-card,
+body.dark-theme .route-card,
+body.dark-theme .info-card{
+
+    background:#1f2937;
+    color:#f1f5f9;
+
+}
+
+body.dark-theme .search-box .form-control{
+
+    background:#1f2937;
+    color:white;
+    border:1px solid #374151;
+
+}
+
+body.dark-theme .search-box .form-control::placeholder{
+
+    color:#94a3b8;
+
+}
+
+body.dark-theme .footer{
+
+    border-top:1px solid rgba(255,255,255,.1);
+
+}
